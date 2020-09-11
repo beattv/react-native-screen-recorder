@@ -123,7 +123,7 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
         mediaRecorder!!.setVideoSize(screenWidth as Int, screenHeight as Int)
         mediaRecorder!!.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
         mediaRecorder!!.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
-        mediaRecorder!!.setVideoEncodingBitRate(512 * 1024)
+        mediaRecorder!!.setVideoEncodingBitRate(2 * 1024 * 1024)
         mediaRecorder!!.setVideoFrameRate(24)
         mediaRecorder!!.prepare()
       } catch (e: IOException) {
