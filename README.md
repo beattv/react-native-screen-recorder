@@ -7,7 +7,7 @@ A screen record with app audio + mic module for React Native.
 ## Installation
 
 ```sh
-npm install @beattv/react-native-screen-recorder
+npm install @beapp/react-native-screen-recorder
 ```
 
 pod install
@@ -21,18 +21,18 @@ cd ios && pod install && cd ../
 ### Recording full screen
 
 ```js
-import RecordScreen from '@beattv/react-native-screen-recorder';
+import RecordScreen from '@beapp/react-native-screen-recorder'
 
 // recording start
-RecordScreen.startRecording().catch((error) => console.error(error));
+RecordScreen.startRecording().catch((error) => console.error(error))
 
 // recording stop
 const res = await RecordScreen.stopRecording().catch((error) =>
   console.warn(error)
-);
+)
 
 if (res) {
-  const url = res.result.outputURL;
+  const url = res.result.outputURL
 }
 ```
 

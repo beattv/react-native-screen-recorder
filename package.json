@@ -1,6 +1,6 @@
 {
   "name": "@beapp/react-native-screen-recorder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "react-native-screen-recorder",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -13,7 +13,7 @@
     "android",
     "ios",
     "cpp",
-    "react-native-record-screen.podspec",
+    "react-native-screen-recorder.podspec",
     "!lib/typescript/example",
     "!**/__tests__",
     "!**/__fixtures__",
@@ -38,12 +38,12 @@
     "type": "git",
     "url": "git+https://github.com/beattv/react-native-screen-recorder.git"
   },
-  "author": "Yuta Suzuki <yutasuzuki.r@gmail.com> (https://github.com/yutasuzuki)",
+  "author": "BeApp",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/yutasuzuki/react-native-record-screen/issues"
+    "url": "https://github.com/beattv/react-native-screen-recorder/issues"
   },
-  "homepage": "https://github.com/yutasuzuki/react-native-record-screen#readme",
+  "homepage": "https://github.com/beattv/react-native-screen-recorder#readme",
   "devDependencies": {
     "@commitlint/config-conventional": "^9.1.1",
     "@react-native-community/bob": "^0.16.2",

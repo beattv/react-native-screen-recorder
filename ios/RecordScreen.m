@@ -29,7 +29,6 @@ RCT_EXPORT_METHOD(setup: (NSDictionary *)config)
 {
     self.screenWidth = [RCTConvert int: config[@"width"]];
     self.screenHeight = [RCTConvert int: config[@"height"]];
-    self.prefix = [RCTConvert NSString: config[@"prefix"]];
 }
 
 RCT_REMAP_METHOD(startRecording, resolve:(RCTPromiseResolveBlock)resolve rejecte:(RCTPromiseRejectBlock)reject)
