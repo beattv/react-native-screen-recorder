@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
+import android.media.CamcorderProfile
+import android.media.CameraProfile
 import android.media.MediaRecorder
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
@@ -26,11 +28,10 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
     private var virtualDisplay: VirtualDisplay? = null;
     private var mediaRecorder: MediaRecorder? = null;
 
-    private var screenWidth: Number = 0;
-    private var screenHeight: Number = 0;
-    private var crop: ReadableMap? = null;
-
     internal var videoUri: String = "";
+
+    private var screenWidth: Int = 0;
+    private var screenHeight: Int = 0;
 
     override fun getName(): String {
         return "RecordScreen"
@@ -71,19 +72,18 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun setup(readableMap: ReadableMap) {
-      screenWidth = if (readableMap.hasKey("width")) ceil(readableMap.getDouble("width") as Double).toInt() else 0;
-      screenHeight = if (readableMap.hasKey("height")) ceil(readableMap.getDouble("height") as Double).toInt() else 0;
-      crop =  if (readableMap.hasKey("crop")) readableMap.getMap("crop") else null;
       projectManager = this.reactApplicationContext.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
 
       val metrics = DisplayMetrics()
       reactApplicationContext.currentActivity?.windowManager?.defaultDisplay?.getMetrics(metrics)
       screenDensity = metrics.densityDpi
+      screenWidth = 720
+      screenHeight = 1280
     }
 
     private fun createVirtualDisplay(): VirtualDisplay? {
-      return mediaProjection?.createVirtualDisplay("ScreenSharingDemo",
-              screenWidth as Int, screenHeight as Int, screenDensity,
+      return mediaProjection?.createVirtualDisplay("ScreenSharing",
+              screenWidth, screenHeight, screenDensity,
               DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
               mediaRecorder?.getSurface(), null /*Callbacks*/, null /*Handler*/)
     }
@@ -103,6 +103,7 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
     fun startRecording(promise: Promise) {
       initRecorder()
       shareScreen()
+      promise.resolve(null)
     }
 
     private fun initRecorder() {
@@ -110,21 +111,29 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
         mediaRecorder = MediaRecorder()
         mediaRecorder!!.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder!!.setVideoSource(MediaRecorder.VideoSource.SURFACE)
-        mediaRecorder!!.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+
+        val profile = CamcorderProfile.get(CamcorderProfile.QUALITY_720P)
+
+        mediaRecorder!!.setOutputFormat(profile.fileFormat);
+        // mediaRecorder!!.setOrientationHint(90)
+        mediaRecorder!!.setVideoFrameRate(profile.videoFrameRate);
+        mediaRecorder!!.setVideoSize(profile.videoFrameHeight, profile.videoFrameWidth);
+        mediaRecorder!!.setVideoEncodingBitRate(profile.videoBitRate);
+        mediaRecorder!!.setVideoEncoder(profile.videoCodec);
+        mediaRecorder!!.setAudioEncodingBitRate(profile.audioBitRate);
+        mediaRecorder!!.setAudioChannels(profile.audioChannels);
+        mediaRecorder!!.setAudioSamplingRate(profile.audioSampleRate);
+        mediaRecorder!!.setAudioEncoder(profile.audioCodec);
 
         videoUri = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                 .toString() + StringBuilder("/")
-                .append("EDMT_Record_")
+                .append("screen_recording-")
                 .append(SimpleDateFormat("dd-MM-yyyy-hh_mm_ss").format(Date()))
                 .append(".mp4")
                 .toString();
 
         mediaRecorder!!.setOutputFile(videoUri)
-        mediaRecorder!!.setVideoSize(screenWidth as Int, screenHeight as Int)
-        mediaRecorder!!.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-        mediaRecorder!!.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
-        mediaRecorder!!.setVideoEncodingBitRate(2 * 1024 * 1024)
-        mediaRecorder!!.setVideoFrameRate(24)
+
         mediaRecorder!!.prepare()
       } catch (e: IOException) {
         e.printStackTrace()
@@ -144,6 +153,7 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
         promise.resolve(response);
       } catch (err: RuntimeException) {
         err.printStackTrace();
+        promise.reject(err)
       }
     }
 
