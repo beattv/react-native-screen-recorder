@@ -5,6 +5,7 @@
       "react-native-record-screen": ["./src/index"]
     },
     "allowUnreachableCode": false,
+    "declaration": true,
     "allowUnusedLabels": false,
     "esModuleInterop": true,
     "importsNotUsedAsValues": "error",
