@@ -7,7 +7,6 @@ import android.content.Intent
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.media.CamcorderProfile
-import android.media.CameraProfile
 import android.media.MediaRecorder
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
@@ -17,7 +16,6 @@ import com.facebook.react.bridge.*
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.ceil
 
 
 class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
@@ -125,7 +123,7 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
         mediaRecorder!!.setAudioSamplingRate(profile.audioSampleRate);
         mediaRecorder!!.setAudioEncoder(profile.audioCodec);
 
-        videoUri = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        videoUri = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
                 .toString() + StringBuilder("/")
                 .append("screen_recording-")
                 .append(SimpleDateFormat("dd-MM-yyyy-hh_mm_ss").format(Date()))
@@ -159,8 +157,8 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
 
     @ReactMethod
     fun clean(promise: Promise) {
-      println("clean");
-      promise.resolve(null);
+        println("clean");
+        promise.resolve(null);
     }
 
 }
