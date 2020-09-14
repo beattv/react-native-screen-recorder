@@ -119,7 +119,11 @@ RCT_REMAP_METHOD(startRecording, resolve:(RCTPromiseResolveBlock)resolve rejecte
         }
     } completionHandler:^(NSError* error) {
         NSLog(@"startCapture: %@", error);
+        resolve(@"started");
     }];
+            } else {
+                NSError* err = nil;
+                reject(0, @"Permission denied", err);
             }
                 });
             }];
