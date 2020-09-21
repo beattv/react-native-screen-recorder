@@ -31,6 +31,8 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
     private var screenWidth: Int = 0;
     private var screenHeight: Int = 0;
 
+    private var startPromise: Promise? = null;
+
     override fun getName(): String {
         return "RecordScreen"
     }
@@ -38,10 +40,12 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
     private val mActivityEventListener: ActivityEventListener = object : BaseActivityEventListener() {
       override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent) {
         if (requestCode != REQUEST_CODE) {
+            startPromise?.reject("false")
             return
         }
 
         if (resultCode != RESULT_OK) {
+            startPromise?.reject("false")
             return
         }
 
@@ -49,6 +53,8 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
         mediaProjection!!.registerCallback(MediaProjectionCallback(), null)
         virtualDisplay = createVirtualDisplay()
         mediaRecorder?.start()
+
+        startPromise?.resolve(null)
       }
     }
 
@@ -95,13 +101,15 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
 
       virtualDisplay = createVirtualDisplay()
       mediaRecorder!!.start()
+
+      startPromise?.resolve(null)
     }
 
     @ReactMethod
     fun startRecording(promise: Promise) {
+      startPromise = promise
       initRecorder()
       shareScreen()
-      promise.resolve(null)
     }
 
     private fun initRecorder() {
