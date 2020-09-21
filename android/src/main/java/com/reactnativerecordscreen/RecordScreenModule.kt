@@ -38,14 +38,14 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
     }
 
     private val mActivityEventListener: ActivityEventListener = object : BaseActivityEventListener() {
-      override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent) {
+      override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode != REQUEST_CODE) {
-            startPromise?.reject("false")
+            startPromise?.reject("RECORDING_WRONG_CODE", "Wrong request code.")
             return
         }
 
         if (resultCode != RESULT_OK) {
-            startPromise?.reject("false")
+            startPromise?.reject("RECORDING_REJECTED.", "User rejected recording");
             return
         }
 
