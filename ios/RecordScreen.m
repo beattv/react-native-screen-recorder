@@ -91,7 +91,7 @@ RCT_REMAP_METHOD(startRecording, resolve:(RCTPromiseResolveBlock)resolve rejecte
         if (granted) {
     [self.screenRecorder startCaptureWithHandler:^(CMSampleBufferRef sampleBuffer, RPSampleBufferType bufferType, NSError* error) {
         if (CMSampleBufferDataIsReady(sampleBuffer)) {
-            if (self.writer.status == AVAssetWriterStatusUnknown && !self.encounteredFirstBuffer) {
+            if (self.writer.status == AVAssetWriterStatusUnknown && !self.encounteredFirstBuffer && bufferType == RPSampleBufferTypeVideo) {
                     self.encounteredFirstBuffer = YES;
                     NSLog(@"First buffer video");
                     [self.writer startWriting];
