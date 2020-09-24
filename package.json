@@ -1,6 +1,6 @@
 {
   "name": "@beapp/react-native-screen-recorder",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "react-native-screen-recorder",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
