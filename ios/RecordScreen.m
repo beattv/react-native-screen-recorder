@@ -98,7 +98,9 @@ RCT_REMAP_METHOD(startRecording, resolve:(RCTPromiseResolveBlock)resolve rejecte
                     [self.writer startSessionAtSourceTime:CMSampleBufferGetPresentationTimeStamp(sampleBuffer)];
             } else if (self.writer.status == AVAssetWriterStatusFailed) {
                 
-            } else if (self.writer.status == AVAssetWriterStatusWriting) {
+            }
+            
+            if (self.writer.status == AVAssetWriterStatusWriting) {
                 switch (bufferType) {
                     case RPSampleBufferTypeVideo:
                         if (self.videoInput.isReadyForMoreMediaData) {
