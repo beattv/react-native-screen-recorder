@@ -29,6 +29,7 @@ RCT_EXPORT_METHOD(setup: (NSDictionary *)config)
 {
     self.screenWidth = [RCTConvert int: config[@"width"]];
     self.screenHeight = [RCTConvert int: config[@"height"]];
+    self.enableMic = [RCTConvert BOOL: config[@"enableMic"]];
 }
 
 RCT_REMAP_METHOD(startRecording, resolve:(RCTPromiseResolveBlock)resolve rejecte:(RCTPromiseRejectBlock)reject)
@@ -81,7 +82,9 @@ RCT_REMAP_METHOD(startRecording, resolve:(RCTPromiseResolveBlock)resolve rejecte
     [self.writer setMovieTimeScale:60];
     [self.videoInput setExpectsMediaDataInRealTime:YES];
 
-    self.screenRecorder.microphoneEnabled = YES;
+    if (self.enableMic) {
+        self.screenRecorder.microphoneEnabled = YES;
+    }
     
     [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -128,8 +131,9 @@ RCT_REMAP_METHOD(startRecording, resolve:(RCTPromiseResolveBlock)resolve rejecte
                 });
             }];
 
-    self.screenRecorder.microphoneEnabled = YES;
-
+    if (self.enableMic) {
+        self.screenRecorder.microphoneEnabled = YES;
+    }
 }
 
 RCT_REMAP_METHOD(stopRecording, resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
