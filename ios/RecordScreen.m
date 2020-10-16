@@ -120,7 +120,12 @@ RCT_REMAP_METHOD(startRecording, resolve:(RCTPromiseResolveBlock)resolve rejecte
         }
     } completionHandler:^(NSError* error) {
         NSLog(@"startCapture: %@", error);
-        resolve(@"started");
+
+        if(error == nil) {
+            resolve(@"started");
+        } else {
+            reject(0, @"Permission denied", error);
+        }
     }];
             } else {
                 NSError* err = nil;
