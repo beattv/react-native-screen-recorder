@@ -2,16 +2,21 @@ package com.reactnativerecordscreen
 
 import android.app.Activity
 import android.app.Activity.RESULT_OK
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.media.CamcorderProfile
 import android.media.MediaRecorder
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
+import android.os.Build
 import android.os.Environment
+import android.os.IBinder
 import android.util.DisplayMetrics
+import androidx.core.content.ContextCompat
 import com.facebook.react.bridge.*
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -25,6 +30,8 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
     private var mediaProjection: MediaProjection? = null;
     private var virtualDisplay: VirtualDisplay? = null;
     private var mediaRecorder: MediaRecorder? = null;
+    private lateinit var mService: RecordScreenService
+    private var mBound: Boolean = false
 
     internal var videoUri: String = "";
 
@@ -37,8 +44,21 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
         return "RecordScreen"
     }
 
+    val connection = object : ServiceConnection {
+
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            val binder = service as RecordScreenService.LocalBinder
+            mService = binder.getService()
+            mBound = true
+        }
+
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            mBound = false
+        }
+    }
+
     private val mActivityEventListener: ActivityEventListener = object : BaseActivityEventListener() {
-      override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
+      override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent) {
         if (requestCode != REQUEST_CODE) {
             startPromise?.reject("RECORDING_WRONG_CODE", "Wrong request code.")
             return
@@ -49,6 +69,23 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
             return
         }
 
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+              val captureIntent = Intent(reactApplicationContext, RecordScreenService::class.java).apply {
+                  reactApplicationContext.bindService(this, connection, Context.BIND_AUTO_CREATE)
+                  action = RecordScreenService.ACTION_START
+                  putExtra(RecordScreenService.EXTRA_RESULT_DATA, data!!)
+                  putExtra(RecordScreenService.SCREEN_WIDTH_DATA, screenWidth)
+                  putExtra(RecordScreenService.SCREEN_HEIGHT_DATA, screenHeight)
+                  putExtra(RecordScreenService.SCREEN_DENSITY_DATA, screenDensity)
+              }
+              ContextCompat.startForegroundService(reactApplicationContext, captureIntent)
+              print("started recording")
+              startPromise?.resolve(null)
+
+              return
+          }
+
+          initRecorder()
         mediaProjection = projectManager!!.getMediaProjection(resultCode, data)
         mediaProjection!!.registerCallback(MediaProjectionCallback(), null)
         virtualDisplay = createVirtualDisplay()
@@ -108,7 +145,7 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
     @ReactMethod
     fun startRecording(promise: Promise) {
       startPromise = promise
-      initRecorder()
+
       shareScreen()
     }
 
@@ -149,13 +186,20 @@ class RecordScreenModule(reactContext: ReactApplicationContext) : ReactContextBa
     @ReactMethod
     fun stopRecording(promise: Promise) {
       try {
+          println("stopping")
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+              videoUri = mService.stop()
+          } else {
+              mediaRecorder!!.stop();
+              mediaRecorder!!.release();
+          }
+
         val response = WritableNativeMap();
         val result = WritableNativeMap();
         result.putString("videoUrl", videoUri);
         response.putString("status", "success");
         response.putMap("result", result);
-        mediaRecorder!!.stop();
-        mediaRecorder!!.release();
+
         promise.resolve(response);
       } catch (err: RuntimeException) {
         err.printStackTrace();
